@@ -4,25 +4,68 @@ from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication  #附件
 
 import smtplib #发送邮件
+import argparse
+parser = argparse.ArgumentParser()
 
 input("pls input ")
-
+#像linux命令一样的东西
 #准备发送邮件的参数
-sender = "838750084@qq.com"
+'''
+1. sender: -s --sender qq,126,163, 
+2. to_list: -t --to_list d多个
+3. cc_list: -c --cc_list 
+4. subject -sub --subject
+5.auth_pwd: -auth --auth_pwd
+6.smtp_server: -server --smtpserver 可选
+
+'''
+parser.add_argument("-s", "--sender", dest="sender", required=True)
+parser.add_argument("-t", "--to_list", dest="to_list", nargs="+", required=True)
+parser.add_argument("-c", "--cc_list", dest="cc_list", default=[],nargs="+", required=False)
+parser.add_argument("-sub", "--subject", dest="subject", required=True)
+parser.add_argument("-p", "--auth_pwd", dest="auth_pwd", required=True)
+parser.add_argument("-server", "--ssmtp_server", dest="smtp_server", required=False)
+
+
+result = parser.parse_args()
+# sender = "838750084@qq.com"
+sender = result.sender
+
 #收件人
-to_list = ["838750084@qq.com",
-           "ryan_zhang310@163.com"
-]
+#to_list = ["838750084@qq.com",
+          # "ryan_zhang310@163.com"
+# ]
 
+to_list = result.to_list
 #抄送人
-cc_list = [
-    "838750084@qq.com",
-    "ryan_zhang310@163.com"
-]
+# cc_list = [
+#     "838750084@qq.com",
+#     "ryan_zhang310@163.com"
+# ]
+cc_list = result.cc_list
 
-subject = "This is a test today "
+# subject = "This is a test today "
+subject = result.subject
+
 #授权密码，链接邮箱smtp
-auth_pwd = 'rrskrbnpqkgmbbjj'
+#auth_pwd = ' '
+auth_pwd = result.auth_pwd
+
+
+dic = {
+    "126":'smtp.126.com',
+    "qq":'smtp.qq.com',
+    "163":'smtp.163.com'
+}
+if not result.smtp_server:
+    #计算smtp服务器
+    k = sender.split("@")[1].split(".")[0]
+    v = dic.get(k)
+
+    if v:
+        smtp_server = v
+    else:
+        raise Exception("对不起，您输入的邮箱，对应的服务器不存在，请联系管理员！")
 
 #写邮件
 #创建邮件
